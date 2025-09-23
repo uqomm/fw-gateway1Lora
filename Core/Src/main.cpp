@@ -66,7 +66,7 @@ enum class OperationMode {
 };
 
 
-#define FIRMWARE_OPERATION_MODE OperationMode::RX_MODE
+#define FIRMWARE_OPERATION_MODE OperationMode::TX_RX_MODE
 
 // Identificador único para este dispositivo y su función de módulo esperada para comandos de configuración
 #define DEVICE_ID 0x00
@@ -278,7 +278,7 @@ void enhancedTagSimulation(uint8_t* buffer, size_t* dataSize, uint8_t* commandId
 /* USER CODE BEGIN 0 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart == &huart2 && uartHandler != nullptr) {
+    if (huart == &huart1 && uartHandler != nullptr) {
         // Block LoRa reception when UART data is being received
         blockLoraReception = true;
         
@@ -869,7 +869,7 @@ void processUartCommand() {
     blockStartTime = HAL_GetTick();
     
     // Restart UART reception for next byte - reinitialize interrupt
-    HAL_UART_Receive_IT(&huart2, uartReceiveBuffer, 1);
+    HAL_UART_Receive_IT(&huart1, uartReceiveBuffer, 1);
     
     // blockLoraReception remains true for 1 second
 }
@@ -1228,7 +1228,7 @@ int main(void)
     // Print version information at startup
 
     // Crear instancias de todos los objetos después de que se haya inicializado el hardware
-    uartHandler = new UartHandler(&huart2);
+    uartHandler = new UartHandler(&huart1);
     eepromMemory = new Memory(&hi2c1);
     
     loraNssPin = new Gpio(LORA_NSS_GPIO_Port, LORA_NSS_Pin);
@@ -1245,20 +1245,20 @@ int main(void)
     loraCommandParser = new CommandMessage(static_cast<uint8_t>(MODULE_FUNCTION::SNIFFER), 0x00);
     uartSimulatedCommandParse = new CommandMessage(0x00, 0x00); // MODULE_FUNCTION=0x00, MODULE_ID=0x00 para simulación
 
-
     
+
     // Configurar los objetos ahora que están creados
     lora->check_already_store_data();
     
     // FIXED: Proper UART interrupt setup for single-byte reception
     // Start with single byte reception instead of multi-byte
     // This allows proper frame assembly with start/end delimiter detection
-    HAL_UART_Receive_IT(&huart2, uartReceiveBuffer, 1);
+    HAL_UART_Receive_IT(&huart1, uartReceiveBuffer, 1);
     // uartHandler->enable_receive_interrupt(1); // Replaced with direct HAL call
     
     // Inicializar configuración por defecto para simulación de sniffer
     initializeDefaultDeviceConfig();
-    
+    uint8_t data[10] = "test";
 
   /* USER CODE END 2 */
 
@@ -1268,7 +1268,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
         // 1. Process any new UART data
         if (newUartDataReceived) {
             processUartCommand();
