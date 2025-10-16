@@ -1,0 +1,74 @@
+{
+  "epic": {
+    "summary": "FWL-EPIC: LoRa Gateway Logger System and Repository Migration",
+    "description": "Complete implementation of embedded logger system for LoRa Gateway firmware, including GUI tools, UART migration, parameter logging, and repository organization under uqomm organization.",
+    "project": "FWL",
+    "estimated_hours": 8,
+    "actual_hours": 8,
+    "start_date": "2025-10-16",
+    "end_date": "2025-10-16",
+    "labels": ["logger", "lora", "firmware", "gui", "migration"]
+  },
+  "tasks": [
+    {
+      "summary": "Implement embedded Logger system for STM32F103",
+      "description": "Create Logger.hpp and Logger.cpp with singleton pattern, RS485 output, multiple log levels, and UART3 communication. Includes initialization, message formatting, and hardware abstraction.",
+      "estimated_hours": 2.5,
+      "actual_hours": 2.5,
+      "start_time": "09:00",
+      "end_time": "11:30",
+      "components": ["Logger.hpp", "Logger.cpp"],
+      "labels": ["embedded", "logger", "stm32", "rs485"]
+    },
+    {
+      "summary": "Migrate UART communication from UART1 to UART2",
+      "description": "Update main.cpp and related components to use UART2 instead of UART1 for LoRa data and configuration commands. Includes callback updates and handler initialization.",
+      "estimated_hours": 1,
+      "actual_hours": 1,
+      "start_time": "11:30",
+      "end_time": "12:30",
+      "components": ["main.cpp", "UartHandler"],
+      "labels": ["uart", "migration", "hardware"]
+    },
+    {
+      "summary": "Integrate Logger system into main firmware",
+      "description": "Add logger initialization, heartbeat logging, UART/LoRa communication logging, and error handling integration throughout the main firmware application.",
+      "estimated_hours": 1.5,
+      "actual_hours": 1.5,
+      "start_time": "12:30",
+      "end_time": "14:00",
+      "components": ["main.cpp", "Logger integration"],
+      "labels": ["integration", "firmware", "logging"]
+    },
+    {
+      "summary": "Add LoRa transmission parameters to heartbeat logging",
+      "description": "Enhance Logger::logHeartbeat() to include LoRa transmission parameters (RX/TX frequency, spread factor, coding rate, bandwidth) for better monitoring and debugging.",
+      "estimated_hours": 1,
+      "actual_hours": 1,
+      "start_time": "14:00",
+      "end_time": "15:00",
+      "components": ["Logger.cpp", "Lora.hpp"],
+      "labels": ["lora", "parameters", "monitoring"]
+    },
+    {
+      "summary": "Create comprehensive GUI configuration application",
+      "description": "Develop lora_gui_config.py with 4-tab interface (Connection, Parameters, Advanced, Log), serial communication, parameter validation, and real-time monitoring capabilities.",
+      "estimated_hours": 1.5,
+      "actual_hours": 1.5,
+      "start_time": "15:00",
+      "end_time": "16:30",
+      "components": ["lora_gui_config.py", "radio_command_codes.py"],
+      "labels": ["gui", "python", "configuration", "monitoring"]
+    },
+    {
+      "summary": "Repository migration and organization",
+      "description": "Transfer repository from personal account to uqomm organization, create fw-gateway1Lora repository, organize project structure, and update documentation.",
+      "estimated_hours": 0.5,
+      "actual_hours": 0.5,
+      "start_time": "16:30",
+      "end_time": "17:00",
+      "components": ["GitHub repository", "Documentation"],
+      "labels": ["repository", "migration", "organization"]
+    }
+  ]
+}

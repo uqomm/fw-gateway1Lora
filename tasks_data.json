@@ -1,0 +1,94 @@
+[
+  {
+    "summary": "Implement Embedded Logger System (Logger.hpp/Logger.cpp)",
+    "description": "\n**Objective:** Create comprehensive logging system for STM32F103 firmware\n\n**Implementation Details:**\n• Singleton pattern Logger class with thread-safe access\n• Multiple log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)  \n• RS485 output via UART3 with automatic DE/RE control\n• Message formatting with timestamps and source identification\n• Hardware abstraction for different logging targets\n\n**Key Features:**\n• Real-time log output via RS485 for external monitoring\n• Configurable log levels and message filtering\n• Hex data logging for communication debugging\n• Integration with existing firmware architecture\n\n**Files Modified:**\n• Core/Inc/Logger.hpp (new)\n• Core/Src/Logger.cpp (new)\n• Integration points in main.cpp\n            ",
+    "estimated_hours": 2.5,
+    "actual_hours": 2.5,
+    "start_time": "09:00",
+    "end_time": "11:30",
+    "labels": [
+      "embedded",
+      "logger",
+      "stm32",
+      "rs485",
+      "singleton"
+    ],
+    "priority": "High"
+  },
+  {
+    "summary": "UART1 to UART2 Migration",
+    "description": "\n**Objective:** Migrate main communication from UART1 to UART2\n\n**Changes Made:**\n• Updated HAL_UART_RxCpltCallback to handle huart2 instead of huart1\n• Modified UartHandler initialization to use huart2\n• Updated all UART communication references in main.cpp\n• Verified callback routing and interrupt handling\n\n**Technical Benefits:**\n• Better hardware resource allocation\n• Improved communication reliability\n• Cleaner hardware abstraction\n\n**Files Modified:**\n• Core/Src/main.cpp (UART callbacks and initialization)\n• UartHandler configuration updates\n            ",
+    "estimated_hours": 1.0,
+    "actual_hours": 1.0,
+    "start_time": "11:30",
+    "end_time": "12:30",
+    "labels": [
+      "uart",
+      "migration",
+      "hardware",
+      "hal"
+    ],
+    "priority": "High"
+  },
+  {
+    "summary": "Logger System Integration into Main Firmware",
+    "description": "\n**Objective:** Integrate Logger throughout main firmware application\n\n**Integration Points:**\n• Logger initialization in main() function\n• Heartbeat logging every 30 seconds with system status\n• UART communication logging (RX/TX with hex data)\n• LoRa transmission/reception logging  \n• Command processing logging with detailed status\n• Error condition logging and diagnostics\n\n**Logging Categories:**\n• SYSTEM: General system status and heartbeat\n• UART2: Serial communication monitoring\n• LORA_RX/LORA_TX: LoRa radio operations\n• COMMAND: Configuration command processing\n• ERROR_SRC: Error conditions and diagnostics\n\n**Benefits:**\n• Real-time firmware debugging via RS485\n• Communication troubleshooting capabilities\n• System health monitoring\n• Development and production diagnostics\n            ",
+    "estimated_hours": 1.5,
+    "actual_hours": 1.5,
+    "start_time": "12:30",
+    "end_time": "14:00",
+    "labels": [
+      "integration",
+      "firmware",
+      "debugging",
+      "monitoring"
+    ],
+    "priority": "High"
+  },
+  {
+    "summary": "LoRa Parameters in Heartbeat Logging",
+    "description": "\n**Objective:** Enhance heartbeat logging with LoRa transmission parameters\n\n**Implementation:**\n• Modified Logger::logHeartbeat() to include LoRa parameters\n• Added external reference to global lora object\n• Parameter logging: RX/TX frequency, spread factor, coding rate, bandwidth\n• Null pointer safety checks for LoRa object access\n• Forward declaration for clean header dependencies\n\n**Enhanced Heartbeat Format:**\n```\n[HH:MM:SS] INF:SYS Heartbeat - Uptime: XX:XX:XX, Messages: XXX, LoRa[RX:XXXXXXHz TX:XXXXXXHz SF:XX CR:X BW:X]\n```\n\n**Technical Benefits:**\n• Real-time LoRa configuration monitoring\n• Parameter verification during operation\n• Debugging aid for configuration changes\n• System health dashboard information\n\n**Files Modified:**\n• Core/Inc/Logger.hpp (forward declaration, external reference)\n• Core/Src/Logger.cpp (enhanced logHeartbeat method)\n            ",
+    "estimated_hours": 1.0,
+    "actual_hours": 1.0,
+    "start_time": "14:00",
+    "end_time": "15:00",
+    "labels": [
+      "lora",
+      "parameters",
+      "monitoring",
+      "heartbeat"
+    ],
+    "priority": "Medium"
+  },
+  {
+    "summary": "GUI Configuration Application Development",
+    "description": "\n**Objective:** Create comprehensive GUI for LoRa Gateway configuration\n\n**Application Features:**\n• 4-tab interface: Connection, Parameters, Advanced, Log\n• Real-time serial communication with device\n• Parameter validation and range checking\n• Live log monitoring and filtering\n• Configuration backup/restore functionality\n• Professional UI with status indicators\n\n**Technical Implementation:**\n• Python tkinter framework for cross-platform compatibility\n• Serial communication via pyserial library\n• CRC16 XMODEM protocol implementation\n• Command/response protocol handling\n• Multi-threaded log monitoring\n• JSON configuration management\n\n**Key Files:**\n• lora_gui_config.py (main application)\n• radio_command_codes.py (protocol definitions)\n• utils/log_config.py (logging utilities)\n• requirements.txt (dependencies)\n• GUI_MANUAL.md (user documentation)\n\n**User Benefits:**\n• Easy device configuration without command line\n• Real-time parameter monitoring\n• Professional troubleshooting interface\n• Backup/restore capabilities\n            ",
+    "estimated_hours": 1.5,
+    "actual_hours": 1.5,
+    "start_time": "15:00",
+    "end_time": "16:30",
+    "labels": [
+      "gui",
+      "python",
+      "tkinter",
+      "configuration",
+      "serial"
+    ],
+    "priority": "Medium"
+  },
+  {
+    "summary": "Repository Migration and Organization",
+    "description": "\n**Objective:** Migrate repository to uqomm organization and improve structure\n\n**Migration Tasks:**\n• GitHub CLI installation and authentication setup\n• Repository transfer from arturoSigmadev to uqomm organization\n• Remote URL updates in local git configuration\n• Repository settings configuration (issues, wiki, projects)\n• Access verification and testing\n\n**Organization Improvements:**\n• Clean project structure with proper directories\n• Comprehensive README and documentation\n• Professional repository description\n• Proper licensing and contribution guidelines\n• CI/CD preparation for future automation\n\n**Final Repository:**\n• Organization: uqomm\n• Repository: fw-gateway1Lora  \n• URL: https://github.com/uqomm/fw-gateway1Lora\n• Visibility: Public\n• Features: Issues, Wiki, Projects enabled\n\n**Benefits:**\n• Professional project organization\n• Team collaboration capabilities\n• Centralized under uqomm organization\n• Better project governance and access control\n            ",
+    "estimated_hours": 0.5,
+    "actual_hours": 0.5,
+    "start_time": "16:30",
+    "end_time": "17:00",
+    "labels": [
+      "repository",
+      "github",
+      "migration",
+      "organization"
+    ],
+    "priority": "Low"
+  }
+]
