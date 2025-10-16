@@ -27,6 +27,7 @@
 #include "Memory.hpp"
 #include "UartHandler.hpp"
 #include "CommandMessage.hpp"
+#include "Logger.hpp"
 #include <vector>
 #include <cstring> // For memcpy and memset
 #include <stdio.h>  // For printf
@@ -197,9 +198,9 @@ CRC_HandleTypeDef hcrc;
 I2C_HandleTypeDef hi2c1;
 IWDG_HandleTypeDef hiwdg;
 SPI_HandleTypeDef hspi1;
-UART_HandleTypeDef huart1; // Assuming for debug or other purposes
-UART_HandleTypeDef huart2; // Main UART for LoRa data and config
-UART_HandleTypeDef huart3; // Potentially for other purposes
+UART_HandleTypeDef huart1; // Available for debug or other purposes
+UART_HandleTypeDef huart2; // Main UART for LoRa data and config commands
+UART_HandleTypeDef huart3; // RS485 Logger output
 
 /* USER CODE BEGIN PV */
 // Punteros globales inicializados a nullptr
@@ -236,6 +237,7 @@ uint32_t blockStartTime = 0;
 const uint32_t BLOCK_DURATION_MS = 1000; // 1 second blocking period
 
 uint32_t keepAliveLastTick = 0;
+uint32_t loggerHeartbeatLastTick = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -278,7 +280,7 @@ void enhancedTagSimulation(uint8_t* buffer, size_t* dataSize, uint8_t* commandId
 /* USER CODE BEGIN 0 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart == &huart1 && uartHandler != nullptr) {
+    if (huart == &huart2 && uartHandler != nullptr) {
         // Block LoRa reception when UART data is being received
         blockLoraReception = true;
         
@@ -717,10 +719,15 @@ void processUartCommand() {
         return;
     }
 
+    // Log incoming UART data
+    LOG_UART2_HEX("RX", uartReceiveBuffer, uartReceivedBytes);
+
     STATUS frameStatus = uartCommandParser->validate(uartReceiveBuffer, uartReceivedBytes);
 
     if (frameStatus == STATUS::CONFIG_FRAME) {
         uint8_t commandId = uartCommandParser->getCommandId();
+        
+        LOG_COMMAND("Processing command 0x%02X", commandId);
         
         // Convertir commandId a CommandType para comparación más clara en el switch
         switch (commandId) {
@@ -793,7 +800,11 @@ void processUartCommand() {
             }
             case static_cast<uint8_t>(CommandType::SET_OPERATION_MODE): {
                 uint8_t newMode = uartCommandParser->getDataAsUint8();
+                LOG_CONFIG("Changing operation mode to: %d", newMode);
                 if (changeOperationMode(newMode)) {
+                    LOG_CONFIG("Operation mode changed successfully to: %s", 
+                              (currentOperationMode == OperationMode::RX_MODE) ? "RX" :
+                              (currentOperationMode == OperationMode::TX_MODE) ? "TX" : "TX_RX");
                     // Responder con confirmación
                     uint8_t response = static_cast<uint8_t>(currentOperationMode);
                     uartCommandParser->composeAndSendMessage(uartHandler, &response, 1);
@@ -869,7 +880,7 @@ void processUartCommand() {
     blockStartTime = HAL_GetTick();
     
     // Restart UART reception for next byte - reinitialize interrupt
-    HAL_UART_Receive_IT(&huart1, uartReceiveBuffer, 1);
+    HAL_UART_Receive_IT(&huart2, uartReceiveBuffer, 1);
     
     // blockLoraReception remains true for 1 second
 }
@@ -886,12 +897,21 @@ void handleLoraReception() {
 
     if (loraReceivedBytes > 0) {
         HAL_GPIO_WritePin(loraRxLed->get_port(), loraRxLed->get_pin(), GPIO_PIN_SET);
+        
+        // Log LoRa received data
+        LOG_LORA_RX_HEX("Received", loraReceiveBuffer, loraReceivedBytes);
 
         if (loraCommandParser) {
             STATUS loraFrameStatus = loraCommandParser->validate(loraReceiveBuffer, loraReceivedBytes);
+            
+            LOG_LORA_RX("Frame validation: %s", 
+                       (loraFrameStatus == STATUS::RETRANSMIT_FRAME) ? "RETRANSMIT" :
+                       (loraFrameStatus == STATUS::VALID_FRAME) ? "VALID" :
+                       (loraFrameStatus == STATUS::CONFIG_FRAME) ? "CONFIG" : "INVALID");
 
             if (loraFrameStatus == STATUS::RETRANSMIT_FRAME || loraFrameStatus == STATUS::VALID_FRAME || loraFrameStatus == STATUS::CONFIG_FRAME) {
                 uartHandler->transmitMessage(loraReceiveBuffer, loraReceivedBytes);
+                LOG_UART2_HEX("TX", loraReceiveBuffer, loraReceivedBytes);
             }
         }
 
@@ -909,7 +929,11 @@ void handleLoraTransmission() {
         if (loraTransmitSizeBytes > 0) {
             HAL_GPIO_WritePin(loraTxLed->get_port(), loraTxLed->get_pin(), GPIO_PIN_SET);
             
+            // Log LoRa transmit data
+            LOG_LORA_TX_HEX("Transmitting", loraTransmitBuffer, loraTransmitSizeBytes);
+            
             if (lora->transmit(loraTransmitBuffer, loraTransmitSizeBytes, LinkMode::DOWNLINK) == HAL_OK) {
+                LOG_LORA_TX("Transmission successful");
                 HAL_Delay(10);
                 HAL_GPIO_WritePin(loraTxLed->get_port(), loraTxLed->get_pin(), GPIO_PIN_RESET);
             } else {
@@ -1225,10 +1249,22 @@ int main(void)
   MX_CRC_Init();
  // MX_IWDG_Init(); // Independent Watchdog, enable if needed
   /* USER CODE BEGIN 2 */
+    // Initialize Logger first (needs UART3 to be initialized)
+    Logger& logger = Logger::getInstance();
+    logger.init();
+    
     // Print version information at startup
+    LOG_SYSTEM("=== LoRa Gateway Starting ===");
+    LOG_SYSTEM("Version: %s", FIRMWARE_VERSION);
+    LOG_SYSTEM("Build: %s %s", BUILD_DATE, BUILD_TIME);
+    LOG_SYSTEM("Operation Mode: %s", 
+               (FIRMWARE_OPERATION_MODE == OperationMode::RX_MODE) ? "RX" :
+               (FIRMWARE_OPERATION_MODE == OperationMode::TX_MODE) ? "TX" : "TX_RX");
+    LOG_SYSTEM("Main communication: UART2 (USART2)");
+    LOG_SYSTEM("Logger output: UART3 (USART3) RS485");
 
     // Crear instancias de todos los objetos después de que se haya inicializado el hardware
-    uartHandler = new UartHandler(&huart1);
+    uartHandler = new UartHandler(&huart2);
     eepromMemory = new Memory(&hi2c1);
     
     loraNssPin = new Gpio(LORA_NSS_GPIO_Port, LORA_NSS_Pin);
@@ -1253,12 +1289,11 @@ int main(void)
     // FIXED: Proper UART interrupt setup for single-byte reception
     // Start with single byte reception instead of multi-byte
     // This allows proper frame assembly with start/end delimiter detection
-    HAL_UART_Receive_IT(&huart1, uartReceiveBuffer, 1);
+    HAL_UART_Receive_IT(&huart2, uartReceiveBuffer, 1);
     // uartHandler->enable_receive_interrupt(1); // Replaced with direct HAL call
     
     // Inicializar configuración por defecto para simulación de sniffer
     initializeDefaultDeviceConfig();
-    uint8_t data[10] = "test";
 
   /* USER CODE END 2 */
 
@@ -1305,6 +1340,12 @@ int main(void)
                         HAL_GPIO_WritePin(keepAliveLed->get_port(), keepAliveLed->get_pin(), GPIO_PIN_RESET);
                     }
                 }
+            }
+            
+            // Logger heartbeat every 30 seconds
+            if (HAL_GetTick() - loggerHeartbeatLastTick > 30000) {
+                loggerHeartbeatLastTick = HAL_GetTick();
+                Logger::getInstance().logHeartbeat();
             }
         }
         //HAL_IWDG_Refresh(&hiwdg);
@@ -1721,6 +1762,11 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  
+  // Try to log the error before disabling interrupts
+  LOG_CRITICAL(LogSource::ERROR_SRC, "CRITICAL ERROR - System entering error handler");
+  LOG_CRITICAL(LogSource::ERROR_SRC, "Device requires reset - Uptime: %lu ms", HAL_GetTick());
+  
   __disable_irq(); // Disable interrupts to prevent further issues
   // Blink an error LED or send an error message via a debug UART if possible
   while (1)

@@ -1,0 +1,27 @@
+[
+  {
+    "summary": "FASE 1: Sistema de Modos Persistente",
+    "description": "## Objetivo\nImplementar sistema de persistencia EEPROM para RadioMode y configuración de logger.\n\n## Tareas\n1. Extender estructura EEPROM con RadioMode y configuración de logger\n2. Implementar lectura/escritura de modo default\n3. Agregar validación con checksum simple\n4. Testing de persistencia después de reset\n\n## Entregables\n- Memory.hpp extendido con nuevos métodos\n- Memory.cpp con funciones de persistencia\n- Modo guardado sobrevive a reinicios\n\n## Criterios de Aceptación\n- ✅ Dispositivo inicia en el último modo usado\n- ✅ Configuración persiste después de power cycle\n- ✅ Sin regresiones en funcionalidad EEPROM existente\n\n## Estimación\n2 horas",
+    "labels": ["v2.2.0", "fase-1", "eeprom", "persistence"]
+  },
+  {
+    "summary": "FASE 2: Logger Simple",
+    "description": "## Objetivo\nCrear sistema de logging minimalista con 4 niveles y output por UART2.\n\n## Tareas\n1. Crear clase Logger minimalista\n2. Implementar 4 niveles: ERROR, WARN, INFO, DEBUG\n3. Output por UART2 con timestamps simples\n4. Agregar métodos de conveniencia para eventos comunes\n\n## Entregables\n- Logger.hpp - Interfaz simple y clara\n- Logger.cpp - Implementación eficiente\n- Logs formateados con color ANSI\n\n## Criterios de Aceptación\n- ✅ Logger funciona sin afectar performance\n- ✅ Output legible y útil para debug\n- ✅ Puede habilitarse/deshabilitarse en runtime\n- ✅ No causa overflows de buffer UART\n\n## Estimación\n3 horas",
+    "labels": ["v2.2.0", "fase-2", "logger", "uart"]
+  },
+  {
+    "summary": "FASE 3: Comandos de Control",
+    "description": "## Objetivo\nAgregar comandos UART para control de logger y sistema.\n\n## Tareas\n1. Agregar 4 comandos de logger (enable/disable/set level/query)\n2. Agregar comando para guardar modo default\n3. Implementar handlers en main loop\n4. Testing de todos los comandos\n\n## Entregables\n- CommandMessage.hpp extendido\n- Handlers en main.cpp\n- Tabla de comandos documentada\n\n## Criterios de Aceptación\n- ✅ Todos los comandos responden correctamente\n- ✅ Configuración se guarda en EEPROM\n- ✅ Respuestas UART válidas y consistentes\n\n## Estimación\n2 horas",
+    "labels": ["v2.2.0", "fase-3", "commands", "uart"]
+  },
+  {
+    "summary": "FASE 4: Integración LoRa + FSK",
+    "description": "## Objetivo\nIntegrar LoRa y FSK sin pérdida de funcionalidad, removiendo hardcoding.\n\n## Tareas\n1. Remover inicialización FSK hardcoded\n2. Crear función initialize_radio_mode() inteligente\n3. Restaurar configuración LoRa desde EEPROM al cambiar modo\n4. Agregar logging a cambios de modo y configuración\n5. Testing exhaustivo de switching\n\n## Entregables\n- main.cpp modificado sin hardcoding\n- Switching LoRa ↔ FSK funcional\n- Logging de todos los eventos importantes\n\n## Criterios de Aceptación\n- ✅ Funcionalidad LoRa original 100% preservada\n- ✅ Funcionalidad FSK funciona correctamente\n- ✅ Switching entre modos sin crashes\n- ✅ Configuración correcta se aplica en cada modo\n\n## Estimación\n3 horas",
+    "labels": ["v2.2.0", "fase-4", "integration", "lora", "fsk"]
+  },
+  {
+    "summary": "FASE 5: Testing y Documentación",
+    "description": "## Objetivo\nValidar integración completa y documentar sistema.\n\n## Tareas\n1. Crear script Python de testing automatizado\n2. Documentar todos los comandos UART\n3. Crear guía de usuario simple\n4. Testing de regresión completo\n5. Actualizar CHANGELOG y README\n\n## Entregables\n- test_integration.py - Suite de tests\n- UART_COMMANDS.md - Documentación completa\n- USER_GUIDE.md - Guía simple de uso\n- Release notes v2.2.0\n\n## Criterios de Aceptación\n- ✅ Todos los tests automatizados pasan\n- ✅ Documentación clara y completa\n- ✅ Sin bugs conocidos\n- ✅ Performance adecuado\n\n## Estimación\n2 horas",
+    "labels": ["v2.2.0", "fase-5", "testing", "documentation"]
+  }
+]

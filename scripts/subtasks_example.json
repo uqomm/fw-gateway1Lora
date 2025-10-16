@@ -1,0 +1,27 @@
+[
+  {
+    "summary": "Implement FSK frequency control",
+    "description": "Add commands for dynamic FSK frequency configuration (160-190 MHz range)",
+    "labels": ["fsk", "v2.1.0"]
+  },
+  {
+    "summary": "UART dual port configuration",
+    "description": "Configure UART1 for commands and UART2 for FSK data output",
+    "labels": ["uart", "v2.1.0"]
+  },
+  {
+    "summary": "SysTick diagnostic utilities",
+    "description": "Implement real-time diagnostic capture and remote monitoring",
+    "labels": ["diagnostics", "v2.5.0"]
+  },
+  {
+    "summary": "FSK protocol analyzer",
+    "description": "Analyze and decode FSK signals from Becker Varis protocol",
+    "labels": ["fsk", "analyzer", "v2.6.0"]
+  },
+  {
+    "summary": "Data capture buffer optimization",
+    "description": "Optimize circular buffer for FSK data storage with 4KB capacity",
+    "labels": ["buffer", "optimization", "v2.6.0"]
+  }
+]
